@@ -52,6 +52,9 @@
 #include "tf2_sensor_msgs/tf2_sensor_msgs.h"
 #include "tf2_ros/create_timer_ros.h"
 
+#include <chrono>
+using namespace std::chrono;
+
 namespace pointcloud_to_laserscan
 {
 
@@ -75,7 +78,7 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   inf_epsilon_ = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_ = this->declare_parameter("use_inf", true);
 
-  pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
+  pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(rclcpp::KeepLast(5)).reliable().durability_volatile());
 
   using std::placeholders::_1;
   // if pointcloud target frame specified, we need to filter by transform availability
@@ -120,6 +123,8 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
           "Got a subscriber to laserscan, starting pointcloud subscriber");
         rclcpp::SensorDataQoS qos;
         qos.keep_last(input_queue_size_);
+        qos.reliable();
+        qos.durability_volatile();
         sub_.subscribe(this, "cloud_in", qos.get_rmw_qos_profile());
       }
     } else if (sub_.getSubscriber()) {
@@ -163,6 +168,8 @@ void PointCloudToLaserScanNode::cloudCallback(
     scan_msg->ranges.assign(ranges_size, scan_msg->range_max + inf_epsilon_);
   }
 
+  auto start = high_resolution_clock::now();
+
   // Transform cloud if necessary
   if (scan_msg->header.frame_id != cloud_msg->header.frame_id) {
     try {
@@ -174,6 +181,16 @@ void PointCloudToLaserScanNode::cloudCallback(
       return;
     }
   }
+
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(stop - start);
+  std::cout << "Time: " << duration.count() << " ms" << std::endl;
+  RCLCPP_INFO(
+        this->get_logger(),
+        "Time: %ld ms",
+       duration.count());
+
+  
 
   // Iterate through pointcloud
   for (sensor_msgs::PointCloud2ConstIterator<float> iter_x(*cloud_msg, "x"),
