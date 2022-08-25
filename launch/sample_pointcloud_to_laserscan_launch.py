@@ -56,13 +56,13 @@ def generate_launch_description():
             parameters=[{
                 'target_frame': 'map',
                 'transform_tolerance': 0.010,
-                'min_height': 0.1,
+                'min_height': 0.01,
                 'max_height': 2.0,
                 'angle_min': -1.57,  # -M_PI/2
                 'angle_max': 1.57,  # M_PI/2
                 'angle_increment': 0.008,  # M_PI/360.0
                 'scan_time': 0.333,
-                'range_min': 0.45,
+                'range_min': 0.01,
                 'range_max': 10.0,
                 'use_inf': True,
                 'inf_epsilon': 100.0
