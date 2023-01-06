@@ -11,12 +11,12 @@ def generate_launch_description():
             description='Namespace for sample topics'
         ),
         
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher',
-            arguments=['0', '0', '0', '1.57', '-1.57', '0.0', 'camera_depth_optical_frame', 'map']
-        ),
+        #Node(
+        #    package='tf2_ros',
+        #    executable='static_transform_publisher',
+        #    name='static_transform_publisher',
+        #    arguments=['0', '0', '0', '0.0', '0.0', '0.0', 'camera_depth_optical_frame', 'camera_link']
+        #),
         # Node(
         #     package='pointcloud_to_laserscan', executable='dummy_pointcloud_publisher',
         #     remappings=[('cloud', [LaunchConfiguration(variable_name='scanner'), '/cloud'])],
@@ -54,15 +54,15 @@ def generate_launch_description():
             remappings=[('cloud_in', '/camera/depth/color/points'),
                         ('scan', '/scan_pointcloud')],
             parameters=[{
-                'target_frame': 'map',
+                'target_frame': 'base_footprint',
                 'transform_tolerance': 0.010,
-                'min_height': 0.01,
-                'max_height': 2.0,
-                'angle_min': -1.57,  # -M_PI/2
-                'angle_max': 1.57,  # M_PI/2
+                'min_height': 0.05,
+                'max_height': 2.3,
+                'angle_min': -3.14,  # -M_PI/2
+                'angle_max': +3.14,  # M_PI/2
                 'angle_increment': 0.008,  # M_PI/360.0
                 'scan_time': 0.333,
-                'range_min': 0.01,
+                'range_min': 0.1,
                 'range_max': 10.0,
                 'use_inf': True,
                 'inf_epsilon': 100.0
